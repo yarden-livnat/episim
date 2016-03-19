@@ -1,0 +1,56 @@
+
+#map {
+    /*position: fixed;*/
+    /*left: 10px;*/
+    /*top: 10px;*/
+    width: 1000px;
+    height: 800px;
+    border: solid gray 1px;
+}
+
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+.info h4 {
+    margin: 0 0 5px;
+    color: #777;
+}
+
+.legend {
+    line-height: 18px;
+    color: #555;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+.tspan {
+    white-space: pre
+}
+/*#map path {*/
+    /*fill: #fff;*/
+    /*fill-opacity: 0.3;*/
+    /*stroke: #ccc;*/
+    /*stroke-width: 1px;*/
+/*}*/
+
+/*#map path:hover {*/
+    /*stroke-width: 1.5px;*/
+    /*stroke: #000;*/
+    /*z-index: 2;*/
+/*}*/
+
+/*#map path.selected {*/
+    /*stroke-width: 3px;*/
+    /*stroke: green;*/
+    /*z-index: 1;*/
+/*}*/
