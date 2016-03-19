@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Episim GB</title>
+
+    <link rel="stylesheet" href="//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <link href="assets/app.css" rel="stylesheet">
+</head>
+<body>
+
+
+<div>
+    Day: <span id="day-value"></span> <input type="range" id="day" value="1" min="0" max="120" step="1" style="width:500px">  <br>
+    Cases: <span id="cases"></span><br>
+</div>
+
+<!--<div id="totalChart" style="display:inline-block"></div>-->
+<div id="chart" style="display:inline-block"></div>
+
+<div id="map"></div>
+
+
+<script src="//d3js.org/queue.v1.min.js"></script>
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="//d3js.org/topojson.v1.min.js"></script>
+
+<script src="//code.highcharts.com/highcharts.js"></script>
+<script src="//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
+
+<script src="src/map.js"></script>
+</body>
+</html>
