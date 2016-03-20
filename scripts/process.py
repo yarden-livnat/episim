@@ -1,9 +1,11 @@
 import csv
 import json
 import time
+from sys import argv
 from collections import defaultdict
 
-STATE = 'ca'
+PREFIX = 'ca'
+
 HOMES_FILE = 'home_locations_ref.txt'
 PERSON_FILE = 'persons_ref.txt'
 DENDOGRAM_FILE = 'dendogram.txt'
@@ -23,7 +25,7 @@ def age_group(age):
 
 
 def file_path(name):
-    return '../data/'+STATE + '-' + name
+    return '../data/'+PREFIX + name
 
 
 def county_factory():
@@ -48,6 +50,12 @@ county = defaultdict(int)
 unknown = defaultdict(int)
 
 cases_per_day = defaultdict(day_factory)
+
+if len(argv) == 2:
+    PREFIX = argv[1]
+
+if PREFIX[-1] != '-':
+    PREFIX += '-'
 
 print 'read zip_county'
 t0 = time.clock()
@@ -115,7 +123,7 @@ print 'days:', len(cases_per_day)
 
 print 'save json'
 t0 = time.clock()
-with open('../map/assets/'+STATE+'-cases_per_day.json', 'wb') as f:
+with open('../map/assets/'+PREFIX+'cases_per_day.json', 'wb') as f:
     json.dump(cases_per_day, f, sort_keys=True) #indent=2,
 t1 = time.clock()
 print'\t', (t1-t0), ' secs'
