@@ -1,7 +1,10 @@
 import csv
+from sys import argv
+
 from collections import defaultdict
 
-STATE = 'ca'
+PREFIX = 'ca'
+
 HOMES_FILE = 'home_locations_ref.txt'
 PERSON_FILE = 'persons_ref.txt'
 ZIP_COUNTY_FILE = 'zip_county.csv'
@@ -11,12 +14,18 @@ COUNTY_FILE = 'county_pop.csv'
 
 
 def file_path(name):
-    return '../data/'+STATE + '-' + name
+    return '../data/'+PREFIX+ name
 
 homes = dict()
 zip2county = dict()
 pop = defaultdict(int)
 missing = defaultdict(int)
+
+if len(argv) == 2:
+    PREFIX = argv[1]
+
+if PREFIX[-1] != '-':
+    PREFIX += '-'
 
 with open(file_path(HOMES_FILE), 'rb') as csvfile:
     f = csv.reader(csvfile, delimiter=' ')
@@ -61,7 +70,7 @@ print 'missing:', missing
 #                 missing[h[2]] += 1
 #     print 'missing:', missing
 
-with open('../map/assets/'+STATE+'-'+COUNTY_FILE, 'wb') as cfile:
+with open('../map/assets/'+PREFIX+COUNTY_FILE, 'wb') as cfile:
     o = csv.writer(cfile)
     o.writerow(['county', 'pop'])
     o.writerows(pop.items())

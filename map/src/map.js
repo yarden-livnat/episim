@@ -10,7 +10,7 @@ var AGE_GROUPS = [
   '19-64 Adults',
   '   +64  Elderly'];
 
-var STATE = 'ca';
+var PREFIX = 'ca';
 
 var countyPop = {};
 var data;
@@ -158,7 +158,7 @@ function style(feature) {
   return {
     fillColor: color(rate),
     weight: 0.25,
-    opacity: 1,
+    opacity: rate && 1 || 0,
     color: 'gray',
     //dashArray: '3',
     fillOpacity: rate && 0.7 || 0
@@ -221,8 +221,8 @@ var chart = new Highcharts.Chart({
  */
 queue()
   .defer(d3.json, 'assets/us.json')
-  .defer(d3.json, 'assets/'+STATE+'-cases_per_day.json')
-  .defer(d3.csv,  'assets/'+STATE+'-county_pop.csv', function(d) { countyPop[+d.county] = +d.pop; })
+  .defer(d3.json, 'assets/'+PREFIX+'-cases_per_day.json')
+  .defer(d3.csv,  'assets/'+PREFIX+'-county_pop.csv', function(d) { countyPop[+d.county] = +d.pop; })
 
   .await( function(error, topology, list) {
     if (error) throw error;
