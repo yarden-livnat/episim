@@ -38,20 +38,21 @@ def day_factory():
     return d
 
 
-# homes = dict()
 people = dict()
 zip2county = defaultdict(str)
 cases_per_day = defaultdict(day_factory)
-
 pop = defaultdict(int)
+
 unknown = []
 missing = defaultdict(int)
 
 
 # Init
-dir_name = '../data/ca'
-if len(argv) == 2:
-    dir_name = argv[1]
+if len(argv) != 2:
+    print 'Usage: ', argv[0], '<path to dataset directory>'
+    exit(0)
+
+dir_name = argv[1]
 PREFIX = os.path.basename(dir_name) + '-'
 
 if dir_name[-1] != '/':
@@ -67,16 +68,6 @@ with open(ZIP_COUNTY_FILE, 'rb') as zipfile:
         zip2county[row[0]] = int(row[1])
 t1 = time.clock()
 print'\t',len(zip2county),'records in',(t1-t0),' secs'
-
-# print 'read homes'
-# t0 = time.clock()
-# with open(os.path.join(dir_name, HOMES_FILE), 'rb') as csvfile:
-#     f = csv.reader(csvfile, delimiter=' ')
-#     f.next()
-#     for row in f:
-#         homes[row[0]] = (row[9], row[8], row[7])
-# t1 = time.clock()
-# print'\t',len(homes),'records in',(t1-t0),' secs'
 
 print 'read people'
 t0 = time.clock()
@@ -99,11 +90,11 @@ with open(os.path.join(dir_name, PERSON_FILE), 'rb') as csvfile:
 t1 = time.clock()
 print '\t',len(people),'records in',(t1-t0),' secs'
 if len(missing) > 0:
-    print '\t missing:', missing.items()
+    print '\t unknown zip codes:', missing.items()
 
 print 'write', OUT_COUNTY_FILE
 t0 = time.clock()
-with open('../map/assets/'+PREFIX+OUT_COUNTY_FILE, 'wb') as cfile:
+with open(os.path.join(dir_name, OUT_COUNTY_FILE), 'wb') as cfile:
     o = csv.writer(cfile)
     o.writerow(['county', 'pop'])
     o.writerows(pop.items())
@@ -153,25 +144,25 @@ for filename in files:
                 skipped += 1
 
         if unknown_in_fille > 0:
-            print 'unknown people:', unknown_in_fille
+            print '# of unknown people:', unknown_in_fille
 
 t1 = time.clock()
-print'\t',n,'records in',(t1-t0),' secs'
-
-print 'days:', len(cases_per_day)
-
-print 'save json'
-t0 = time.clock()
-with open('../map/assets/'+PREFIX+'cases_per_day.json', 'wb') as f:
-    json.dump(cases_per_day, f, sort_keys=True) #indent=2,
-t1 = time.clock()
-print'\t', (t1-t0), ' secs'
-
-if skipped > 0:
-    print '\nskipped:', skipped
-
+print '\t',n,'records in',(t1-t0),' secs'
 if len(unknown) > 0:
     print 'unknown: ',len(unknown)
     with open('unknown.txt', 'wb') as f:
         for item in unknown:
             print>>f, item
+
+print 'save json'
+t0 = time.clock()
+with open(os.path.join(dir_name, 'cases_per_day.json'), 'wb') as f:
+    json.dump(cases_per_day, f, sort_keys=True) #indent=2,
+t1 = time.clock()
+print'\t', (t1-t0), ' secs'
+
+print 'done'
+# if skipped > 0:
+#     print '\nskipped:', skipped
+
+
