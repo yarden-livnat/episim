@@ -25,19 +25,23 @@ var CMAP = CMAP_COLORS[CMAP_LEVELS];
 var color = d3.scale.threshold()
     .range(CMAP);
 
+var bin = d3.scale.threshold()
+  .range(d3.range(8));
+
 function update_cmap(levels) {
   CMAP_LEVELS = levels;
   CMAP = CMAP_COLORS[CMAP_LEVELS];
   var f = CMAP_MAX_RATE/levels;
   color.domain(d3.range(f, CMAP_MAX_RATE+f, f));
+  bin.domain(d3.range(f, CMAP_MAX_RATE+f, f));
 }
 
 function update_legend(div) {
   div = div || L.DomUtil.get('.info .legend');
   var n = CMAP.length;
 
-  div.innerHTML += '<b>Rate</b><br>';
-  var f = CMAP_MAX_RATE/n;
+  div.innerHTML += '<b>Rate (%)</b><br>';
+  var f = 100*CMAP_MAX_RATE/n;
   var values = d3.range(f, CMAP_MAX_RATE+f, f);
   for (var i = 0; i < values.length; i++) {
     div.innerHTML += '<i style="background:' + CMAP[i] +'"></i> '
@@ -193,8 +197,8 @@ var chart = new Highcharts.Chart({
     renderTo: document.querySelector('#cases-chart'),
     type: 'area',
     zoomType: 'x',
-    height: 250,
-    width: 700
+    height: 150,
+    width: 600
   },
   title: null,
   xAxis: {
@@ -246,12 +250,12 @@ var rateChart = new Highcharts.Chart({
     renderTo: document.querySelector('#rate-chart'),
     type: 'line',
     zoomType: 'x',
-    height: 250,
-    width: 700
+    height:150,
+    width: 300
   },
-  title: null,
+  title: 'null',
   xAxis: {
-    title: { text: 'day'},
+    title: { text: 'Day'},
     tickInterval: 1,
     plotLines: [total_line]
   },
@@ -270,6 +274,49 @@ var rateChart = new Highcharts.Chart({
       });
 
       return s;
+    }
+  },
+  legend: {
+    enabled: false
+  },
+  series: []
+});
+
+var histogramChart = new Highcharts.Chart({
+  chart: {
+    renderTo: document.querySelector('#histogram-chart'),
+    type: 'column',
+    zoomType: 'x',
+    height:150,
+    width: 300
+  },
+  title: 'null',
+  xAxis: {
+    title: { text: 'Rate'}
+  },
+  yAxis: {
+    min: 0,
+    title: {text: '# of counties'}
+    //tickInterval: 1
+  },
+  //tooltip: {
+  //  crosshairs: true,
+  //  shared: true,
+  //  valueSuffix: '%',
+  //  formatter: function () {
+  //    var s = '<b>Day ' + this.x + '</b>';
+  //    this.points.forEach( function (p) {
+  //      s += '<br/>' + p.series.name + ': ' + Math.floor(10*p.y)/10 + '%';
+  //    });
+  //
+  //    return s;
+  //  }
+  //},
+
+  plotOptions: {
+    column: {
+      pointPadding: 0.2,
+      borderWidth: 0
     }
   },
   legend: {
@@ -381,7 +428,6 @@ d3.select('#day')
   .on('input', function () {
     var d = +this.value;
     d3.select('#day-value').text(d);
-
     show_day(d);
   })
   .property('value', 0);
@@ -396,8 +442,25 @@ function show_day(current) {
 
   var n = 0;
   var counties = data[day].counties;
+  var rates = [];
   for (var i in counties) {
-    n += counties[i].cases;
+    var c = counties[i].cases;
+    n += c;
+    if (countyPop[i])
+      rates.push(c/countyPop[i]);
   }
+
+  var bins = Array(8).fill(0);
+  rates.forEach(function(rate) {
+    bins[bin(rate)]++;
+  });
+
+  bins = bins.map(function(v, i) {
+    return [i/8, v];
+  });
+  if (histogramChart.series.length > 0)
+    histogramChart.series[0].remove();
+
+  histogramChart.addSeries(bins);
   d3.select('#cases').text(n);
 }
