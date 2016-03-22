@@ -1,14 +1,20 @@
 # episim
 
 ### Data
-add the persons_ref.txt, home_locations_ref.txt and dendogram.txt files to the data directory with a prefix, e.g. 'ca-persons_ref.txt'.
+Create a link to your data directory
+```
+ln -s <path> data
+```
+The data directory should have subdirectories for different datasets. Regular files in the data directory will be ignored. Each subdirectory should include the files
+# persons_ref.txt
+# home_locations_ref.txt 
+# dendogram.txt
 
-### prepare
+### Data preparation
 note: this will take time
 ```
 cd scripts
-python population.py <prefix>
-python prepare.py <prefix>
+python post.py <path-to-specific-data-subdirectory
 ```
 
 ### run
