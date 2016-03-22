@@ -17,9 +17,16 @@ var data;
 var day = 0;
 var age_visibility = [true, true, true, true, true, true];
 
-var color = d3.scale.threshold()
-  .domain([0.01, 0.02, 0.03, 0.04])
-  .range(["#ffffb2", "#fecc5c", "#fd8d3c", "#f03b20", "#bd0026"]);
+var MAX_RATE = 0.04;
+var YlOrRd = colorbrewer.YlOrRd['8'];
+
+var color = d3.scale.quantize()
+  .domain([0, MAX_RATE])
+  .range(YlOrRd);
+
+//var tcolor = d3.scale.threshold()
+//  .domain([0.01, 0.02, 0.03, 0.04])
+//  .range(["#ffffb2", "#fecc5c", "#fd8d3c", "#f03b20", "#bd0026"]);
 
 /*
  * Map
@@ -37,7 +44,7 @@ var options = {
 var base = L.tileLayer(baseURL, options);
 
 var map = L.map('map', {layers: [base]})
-  .fitBounds([[32.0, -124], [42, -114]]);
+  .fitBounds([[26, -124], [50, -67]]);
   //.setView([37.8, -96], 4);
 
 L.control.scale().addTo(map);
@@ -54,7 +61,7 @@ info.onAdd = function (map) {
 info.update = function (id) {
   this._div.innerHTML = '<h4>Infected people</h4>';
 
-  if (!id || !data[day].counties[id]) {
+  if (!id || !data || !data[day] || !data[day].counties[id]) {
     //this._div.innerHTML += Hover over a county';
   } else {
     var county = data[day].counties[id];
@@ -103,12 +110,12 @@ var max_rate = 0;
 
 function highlightFeature(e) {
   var layer = e.target;
-
   //console.log(e.latlng);
+
   layer.setStyle({
     weight: 1,
     //color: '#666',
-    dashArray: '',
+    dashArray: ''
     //fillOpacity: 0.7
   });
 
@@ -137,23 +144,20 @@ function onEachFeature(feature, layer) {
 }
 
 function style(feature) {
-  var county = data[day].counties[feature.id];
-  var pop = countyPop[feature.id];
-
   var rate = 0;
-  if (county && pop) {
-    var n = 0;
-    for (var i = 0; i < AGE_GROUPS.length; i++) {
-      if (age_visibility[i])
-        n += county.age[i];
-    }
-    rate =  n / pop;
-  }
+  if (data) {
+    var county = data[day].counties[feature.id];
+    var pop = countyPop[feature.id];
 
-  //if (rate > max_rate) {
-  //  max_rate = rate;
-  //  console.log('rate: ',max_rate);
-  //}
+    if (county && pop) {
+      var n = 0;
+      for (var i = 0; i < AGE_GROUPS.length; i++) {
+        if (age_visibility[i])
+          n += county.age[i];
+      }
+      rate =  n / pop;
+    }
+  }
 
   return {
     fillColor: color(rate),
@@ -170,8 +174,9 @@ function style(feature) {
  */
 var chart = new Highcharts.Chart({
   chart: {
-    renderTo: document.querySelector('#chart'),
+    renderTo: document.querySelector('#cases-chart'),
     type: 'area',
+    zoomType: 'x',
     height: 250,
     width: 700
   },
@@ -183,6 +188,10 @@ var chart = new Highcharts.Chart({
   },
   yAxis: {
     title: {text: '# cases'}
+  },
+  tooltip: {
+    crosshairs: true,
+    shared: true
   },
   legend: {
     layout: 'vertical',
@@ -216,9 +225,47 @@ var chart = new Highcharts.Chart({
   series: []
 });
 
+var rateChart = new Highcharts.Chart({
+  chart: {
+    renderTo: document.querySelector('#rate-chart'),
+    type: 'line',
+    zoomType: 'x',
+    height: 250,
+    width: 700
+  },
+  title: null,
+  xAxis: {
+    title: { text: 'day'},
+    tickInterval: 1,
+    plotLines: [total_line]
+  },
+  yAxis: {
+    title: {text: 'Rate (%)'},
+    tickInterval: 1
+  },
+  tooltip: {
+    crosshairs: true,
+    shared: true,
+    valueSuffix: '%',
+    formatter: function () {
+      var s = '<b>Day ' + this.x + '</b>';
+      this.points.forEach( function (p) {
+        s += '<br/>' + p.series.name + ': ' + Math.floor(10*p.y)/10 + '%';
+      });
+
+      return s;
+    }
+  },
+  legend: {
+    enabled: false
+  },
+  series: []
+});
+
 /*
  * Data
  */
+
 
 queue()
   .defer(d3.json, 'assets/us.json')
@@ -227,21 +274,20 @@ queue()
     if (error) throw error;
 
     d3.select('#dataset').selectAll('option')
-      .data(['choose'].concat(list.split('\n')))
+      .data(['choose'].concat(list.trim().split('\n')))
       .enter()
       .append('option')
       .attr('value', function(d) { return d;})
       .text(function(d) { return d;});
 
+    geojson = L.geoJson(topojson.feature(topology, topology.objects.counties).features, {style: style, onEachFeature: onEachFeature}).addTo(map);
   });
 
 
 function load(file) {
   queue()
     .defer(d3.json, 'data/' + file + '/cases_per_day.json')
-    .defer(d3.csv, 'data/' + file + '/county_pop.csv', function (d) {
-      countyPop[+d.county] = +d.pop;
-    })
+    .defer(d3.csv, 'data/' + file + '/county_pop.csv', function (d) {countyPop[+d.county] = +d.pop; })
     .await(function (error, list) {
       if (error) throw error;
 
@@ -249,8 +295,12 @@ function load(file) {
 
       var last = 0;
       var max = 0;
+      var max_rate = 0;
       var total_series = [];
       var age_series = [[], [], [], [], [], []];
+      var rate_series = [];
+      var county_rate_series = [];
+      var county_avg_series = [];
       var i, j, k;
 
       for (i in data) {
@@ -259,21 +309,43 @@ function load(file) {
         if (n > max) max = n;
         if (i > last) last = i;
 
+        var county_max_rate = 0, county_avg_rate = 0, county_avg_n = 0;
         var counts = [0, 0, 0, 0, 0, 0];
         var counties = data[i].counties;
         for (j in counties) {
+          // cases
           var groups = counties[j].age;
           for (k = 0; k < 6; k++) {
             counts[k] += groups[k] || 0;
           }
+
+          // rate
+          var r = 100*counties[j].cases/countyPop[j];
+          if (r > county_max_rate) county_max_rate = r;
+          if (r > 0) {
+            county_avg_rate += r;
+            county_avg_n++;
+          }
         }
+
+        if (county_max_rate > max_rate) max_rate = county_max_rate;
+        county_rate_series.push(county_max_rate);
+        county_avg_series.push(county_avg_rate/county_avg_n);
+
         for (k = 0; k < 6; k++) {
-          age_series[k].push(counts[k]);
+          age_series[k].push([i, counts[k]]);
         }
       }
 
-      if (chart.series.length) {
-        chart.series[0].remove();
+      for (i=rateChart.series.length-1; i>= 0; i--) {
+        rateChart.series[i].remove();
+      }
+      rateChart.addSeries({name: 'Max', data: county_rate_series});
+      rateChart.addSeries({name: 'Avg', data: county_avg_series});
+
+
+      for (i=chart.series.length-1; i>= 0; i--) {
+        chart.series[i].remove();
       }
       chart.addSeries({name: 'Total', type: 'line', data: total_series});
       for (k = 0; k < 6; k++) {
@@ -281,12 +353,9 @@ function load(file) {
       }
 
       chart.yAxis[0].setExtremes(0, max);
+      //rateChart.yAxis[0].setExtremes(0, max_rate);
 
       d3.select('#day').property('max', last);
-      //geojson = L.geoJson(topojson.feature(topology, topology.objects.counties).features, {style: style, onEachFeature: onEachFeature}).addTo(map);
-
-      d3.select('#day');
-
     });
 }
 
@@ -306,6 +375,7 @@ function show_day(current) {
   day = current;
   total_line.value = day;
   chart.xAxis[0].update();
+  rateChart.xAxis[0].update();
   geojson.setStyle(style);
 
   var n = 0;
