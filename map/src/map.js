@@ -17,16 +17,38 @@ var data;
 var day = 0;
 var age_visibility = [true, true, true, true, true, true];
 
-var MAX_RATE = 0.04;
-var YlOrRd = colorbrewer.YlOrRd['8'];
+var CMAP_MAX_RATE = 0.02;
+var CMAP_LEVELS = 8;
+var CMAP_COLORS = colorbrewer.YlOrRd;
+var CMAP = CMAP_COLORS[CMAP_LEVELS];
 
-var color = d3.scale.quantize()
-  .domain([0, MAX_RATE])
-  .range(YlOrRd);
+var color = d3.scale.threshold()
+    .range(CMAP);
 
-//var tcolor = d3.scale.threshold()
-//  .domain([0.01, 0.02, 0.03, 0.04])
-//  .range(["#ffffb2", "#fecc5c", "#fd8d3c", "#f03b20", "#bd0026"]);
+function update_cmap(levels) {
+  CMAP_LEVELS = levels;
+  CMAP = CMAP_COLORS[CMAP_LEVELS];
+  var f = CMAP_MAX_RATE/levels;
+  color.domain(d3.range(f, CMAP_MAX_RATE+f, f));
+}
+
+function update_legend(div) {
+  div = div || L.DomUtil.get('.info .legend');
+  var n = CMAP.length;
+
+  div.innerHTML += '<b>Rate</b><br>';
+  var f = CMAP_MAX_RATE/n;
+  var values = d3.range(f, CMAP_MAX_RATE+f, f);
+  for (var i = 0; i < values.length; i++) {
+    div.innerHTML += '<i style="background:' + CMAP[i] +'"></i> '
+      + (i == 0   ? '< ' + values[0] :
+        i == values.length-1 ?  '+ ' + values[i-1]  :
+        values[i-1] + ' - ' + values[i])
+      + '<br>';
+  }
+}
+
+update_cmap(CMAP_LEVELS);
 
 /*
  * Map
@@ -68,7 +90,7 @@ info.update = function (id) {
     var pop = countyPop[id];
     var rate = county && pop && county.cases / pop || 0;
 
-    this._div.innerHTML += '<b>' + id + '</b><br />' + county.cases + ' of ' + pop;
+    this._div.innerHTML += '<b>' + id + '</b> pop:' + pop+'<br/>cases:' + county.cases + ' rate: ' + Math.floor(1000*county.cases/pop)/10 + '%';
   }
 };
 
@@ -76,23 +98,17 @@ info.addTo(map);
 
 var legend = L.control({position: 'bottomright'});
 
+function format(v) {
+  return Math.floor(1000*v)/10;
+}
+
 legend.onAdd = function (map) {
   var div = L.DomUtil.create('div', 'info legend');
-  var domain = color.domain();
-  var range = color.range();
-  var n = domain.length;
-
-  div.innerHTML += '<b>Rate</b><br>';
-  for (var i = 0; i < n+1; i++) {
-    div.innerHTML += '<i style="background:' + range[i] +'"></i> '
-      + (i == 0   ? '< '+domain[i] :
-        i == n ? '+ '+ domain[i-1] :
-        domain[i-1] + ' - ' + domain[i])
-      + '<br>';
-  }
-
+  update_legend(div);
   return div;
 };
+
+
 
 legend.addTo(map);
 
