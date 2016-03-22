@@ -1,8 +1,9 @@
 # episim
 
 ### Data
-Create a link to your data directory
+Create a link to your data directory in the map directory
 ```
+cd map
 ln -s <path> data
 ```
 The data directory should have subdirectories for different datasets. Regular files in the data directory will be ignored. Each subdirectory should include the files
