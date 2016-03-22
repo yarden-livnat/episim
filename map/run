@@ -1,2 +1,3 @@
 #!/bin/bash
+ls -1pd data/* | sed -nE 's:.*/([^/]+)/$:\1:p' > assets/datasets.txt
 python -m SimpleHTTPServer 8890

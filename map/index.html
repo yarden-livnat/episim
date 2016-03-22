@@ -13,16 +13,13 @@
 <h2>Episim</h2>
 
 <div>
-    Dataset <select id="dataset">
-        <!--<option value="">select</option>-->
-        <!--<option value="west">WEST</option>-->
-    </select>
-    Day: <span id="day-value"></span> <input type="range" id="day" value="1" min="0" max="120" step="1" style="width:500px">  <br>
+    Dataset <select id="dataset"></select>
+    Day: <span id="day-value"></span> <input type="range" id="day" value="0" min="0" max="0" step="1" style="width:500px">  <br>
     Cases: <span id="cases"></span><br>
 </div>
 
-<!--<div id="totalChart" style="display:inline-block"></div>-->
-<div id="chart" style="display:inline-block"></div>
+<div id="cases-chart" style="display:inline-block"></div>
+<div id="rate-chart" style="display:inline-block"></div>
 
 <div id="map"></div>
 
@@ -32,9 +29,11 @@
 <script src="//d3js.org/topojson.v1.min.js"></script>
 
 <script src="//code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
 <script src="//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 
-
+<script src="src/colorbrewer.js"></script>
 <script src="src/map.js"></script>
+
 </body>
 </html>
