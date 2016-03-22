@@ -10,7 +10,7 @@ var AGE_GROUPS = [
   '19-64 Adults',
   '   +64  Elderly'];
 
-var PREFIX = 'ca';
+var PREFIX = 'W';
 
 var countyPop = {};
 var data;
@@ -219,54 +219,78 @@ var chart = new Highcharts.Chart({
 /*
  * Data
  */
+
 queue()
   .defer(d3.json, 'assets/us.json')
-  .defer(d3.json, 'assets/'+PREFIX+'-cases_per_day.json')
-  .defer(d3.csv,  'assets/'+PREFIX+'-county_pop.csv', function(d) { countyPop[+d.county] = +d.pop; })
-
+  .defer(d3.text, 'assets/datasets.txt')
   .await( function(error, topology, list) {
     if (error) throw error;
 
-    data = list;
+    d3.select('#dataset').selectAll('option')
+      .data(['choose'].concat(list.split('\n')))
+      .enter()
+      .append('option')
+      .attr('value', function(d) { return d;})
+      .text(function(d) { return d;});
 
-    var last = 0;
-    var max = 0;
-    var total_series = [];
-    var age_series = [[], [], [], [], [], []];
-    var i, j, k;
-
-    for (i in data) {
-      var n = data[i].cases;
-      total_series[i] = n;
-      if (n > max) max = n;
-      if (i > last) last = i;
-
-      var counts = [0, 0, 0, 0, 0, 0];
-      var counties = data[i].counties;
-      for (j in counties) {
-        var groups = counties[j].age;
-        for ( k=0; k<6; k++) {
-          counts[k] += groups[k] || 0;
-        }
-      }
-      for (k=0; k<6; k++) {
-        age_series[k].push(counts[k]);
-      }
-    }
-
-    chart.addSeries({name:'Total', type: 'line', data:total_series});
-    for (k=0; k<6; k++) {
-      chart.addSeries({name: AGE_GROUPS[5-k], data: age_series[5-k]})
-    }
-
-    chart.yAxis[0].setExtremes(0, max);
-
-    d3.select('#day').property('max', last);
-    geojson = L.geoJson(topojson.feature(topology, topology.objects.counties).features, {style: style, onEachFeature: onEachFeature}).addTo(map);
-
-    d3.select('#day');
   });
 
+
+function load(file) {
+  queue()
+    .defer(d3.json, 'data/' + file + '/cases_per_day.json')
+    .defer(d3.csv, 'data/' + file + '/county_pop.csv', function (d) {
+      countyPop[+d.county] = +d.pop;
+    })
+    .await(function (error, list) {
+      if (error) throw error;
+
+      data = list;
+
+      var last = 0;
+      var max = 0;
+      var total_series = [];
+      var age_series = [[], [], [], [], [], []];
+      var i, j, k;
+
+      for (i in data) {
+        var n = data[i].cases;
+        total_series[i] = n;
+        if (n > max) max = n;
+        if (i > last) last = i;
+
+        var counts = [0, 0, 0, 0, 0, 0];
+        var counties = data[i].counties;
+        for (j in counties) {
+          var groups = counties[j].age;
+          for (k = 0; k < 6; k++) {
+            counts[k] += groups[k] || 0;
+          }
+        }
+        for (k = 0; k < 6; k++) {
+          age_series[k].push(counts[k]);
+        }
+      }
+
+      if (chart.series.length) {
+        chart.series[0].remove();
+      }
+      chart.addSeries({name: 'Total', type: 'line', data: total_series});
+      for (k = 0; k < 6; k++) {
+        chart.addSeries({name: AGE_GROUPS[5 - k], data: age_series[5 - k]})
+      }
+
+      chart.yAxis[0].setExtremes(0, max);
+
+      d3.select('#day').property('max', last);
+      //geojson = L.geoJson(topojson.feature(topology, topology.objects.counties).features, {style: style, onEachFeature: onEachFeature}).addTo(map);
+
+      d3.select('#day');
+
+    });
+}
+
+d3.select('#dataset').on('change', function() { load(this.value); });
 
 d3.select('#day')
   .on('input', function () {
