@@ -10,17 +10,21 @@
 </head>
 <body>
 
-<h2>Episim</h2>
+<h3>Episim</h3>
 
 <div>
-    Dataset <select id="dataset"></select><br>
-    Day: <span id="day-value"></span> <input type="range" id="day" value="0" min="0" max="0" step="1" style="width:500px">  <br>
-    Cases: <span id="cases"></span><br>
+    <b>Dataset: </b> <select id="dataset"></select>
+    <b>Levels: </b>  <input id="levels" type="number" min="3" max="8" value="8">
+    <b>Max rate:</b> <input id="maxRate" type="number" min="1" value="2" step="0.5" maxlength="5"><br>
+    <b>Day:</b> <span id="day-value"></span> <input type="range" id="day" value="0" min="0" max="0" step="1" style="width:500px">  <br>
+    <b>Cases:</b> <span id="cases"></span><br>
+    <br>
 </div>
 
 <div id="cases-chart" style="display:inline-block"></div>
-<div id="rate-chart" style="display:inline-block"></div>
-<div id="histogram-chart"></div>
+<div id="rate-chart" style="display:inline-block"></div><br>
+<div id="histogram-chart" style="display:inline-block"></div>
+<div id="distribution-chart" style="display:inline-block"></div>
 
 <div id="map"></div>
 
