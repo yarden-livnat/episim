@@ -42,7 +42,7 @@ function update_legend(div) {
 
   div.innerHTML += '<b>Rate (%)</b><br>';
   var f = 100*CMAP_MAX_RATE/n;
-  var values = d3.range(f, CMAP_MAX_RATE+f, f);
+  var values = d3.range(f, 100*CMAP_MAX_RATE+f, f);
   for (var i = 0; i < values.length; i++) {
     div.innerHTML += '<i style="background:' + CMAP[i] +'"></i> '
       + (i == 0   ? '< ' + values[0] :
@@ -316,7 +316,8 @@ var histogramChart = new Highcharts.Chart({
   plotOptions: {
     column: {
       pointPadding: 0.2,
-      borderWidth: 0
+      borderWidth: 0,
+      animation: false
     }
   },
   legend: {
@@ -456,11 +457,11 @@ function show_day(current) {
   });
 
   bins = bins.map(function(v, i) {
-    return [i/8, v];
+    return {x:i*CMAP_MAX_RATE/8, y:v};
   });
   if (histogramChart.series.length > 0)
     histogramChart.series[0].remove();
 
-  histogramChart.addSeries(bins);
+  histogramChart.addSeries({name: 'histogram', data: bins, color: '#000000'});
   d3.select('#cases').text(n);
 }
