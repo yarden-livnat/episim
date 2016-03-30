@@ -473,7 +473,6 @@ function load(file) {
         for (k = 0; k < 6; k++) {
           age_series[k].push([i, counts[k]]);
         }
-
       }
 
       for (i=rateChart.series.length-1; i>= 0; i--) {
