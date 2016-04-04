@@ -1,5 +1,4 @@
 import csv
-import json
 import time
 import os.path
 from sys import argv
@@ -21,7 +20,6 @@ if len(argv) != 2:
     exit(0)
 
 dir_name = argv[1]
-PREFIX = os.path.basename(dir_name) + '-'
 
 if dir_name[-1] != '/':
     dir_name += '/'

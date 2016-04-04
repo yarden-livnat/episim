@@ -15,6 +15,7 @@ var PREFIX = 'W';
 var countyPop = {};
 var data;
 var day = 0;
+var play = false;
 var age_visibility = [true, true, true, true, true, true];
 
 var CMAP_MAX_RATE = 0.02;
@@ -71,6 +72,12 @@ d3.select("#maxRate")
     update_legend();
     geojson.setStyle(style);
     update_distribution();
+  });
+
+d3.select('#play')
+  .on('click', function() {
+    play = !play;
+    d3.select('#play').classed({"fa-play": !play, "fa-pause": play});
   });
 
 /*
@@ -441,7 +448,7 @@ function load(file) {
         var n = data[i].cases;
         total_series[i] = n;
         if (n > max) max = n;
-        if (i > last) last = i;
+        if (+i > last) last = +i;
 
         var county_max_rate = 0, county_avg_rate = 0, county_avg_n = 0;
         var counts = [0, 0, 0, 0, 0, 0];
@@ -495,7 +502,7 @@ function load(file) {
 
       update_distribution();
 
-      d3.select('#day').property('max', last);
+      d3.select('#day').attr('max', last);
       show_day(day);
     });
 }
