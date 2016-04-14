@@ -111,16 +111,16 @@ info.onAdd = function (map) {
 
 // method that we will use to update the control based on feature properties passed
 info.update = function (id) {
-  this._div.innerHTML = '<h4>Infected people</h4>';
-
   if (!id || !data || !data[day] || !data[day].counties[id]) {
-    //this._div.innerHTML += Hover over a county';
+    d3.select(this._div).style('visibility', 'hidden');
   } else {
+    this._div.innerHTML = '<h4>Infected people</h4>';
     var county = data[day].counties[id];
     var pop = countyPop[id];
     var rate = county && pop && county.cases / pop || 0;
 
     this._div.innerHTML += '<b>' + id + '</b> pop:' + pop+'<br/>cases:' + county.cases + ' rate: ' + Math.floor(1000*county.cases/pop)/10 + '%';
+    d3.select(this._div).style('visibility', 'visible');
   }
 };
 

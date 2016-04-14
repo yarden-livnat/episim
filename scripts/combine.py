@@ -11,7 +11,7 @@ ZIP_COUNTY_FILE = '../data/zip_county.csv'
 
 
 def file_path(name):
-    return '../data/'+STATE + '-' + name
+    return '../map/data/'+STATE + '-' + name
 
 
 homes = dict()
