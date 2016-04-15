@@ -21,6 +21,8 @@ var AGE_GROUPS = [
 var PREFIX = 'W';
 var PLAY_INTERNAL = 200;
 
+var CHART_COLORS = ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9', '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'];
+
 var countyPop = {};
 var data;
 var day = 0;
@@ -275,7 +277,7 @@ var chart = new Highcharts.Chart({
     renderTo: document.querySelector('#cases-chart'),
     type: 'area',
     zoomType: 'x',
-    height: 200,
+    height: 150,
     width: 600
   },
   title: {text: null},
@@ -328,7 +330,7 @@ var rateChart = new Highcharts.Chart({
     renderTo: document.querySelector('#rate-chart'),
     type: 'line',
     zoomType: 'x',
-    height:200,
+    height:150,
     width: 400
   },
   title: {text: null},
@@ -542,8 +544,8 @@ function load(file) {
       for (i=rateChart.series.length-1; i>= 0; i--) {
         rateChart.series[i].remove();
       }
-      rateChart.addSeries({name: 'Max', data: county_rate_series});
-      rateChart.addSeries({name: 'Avg', data: county_avg_series});
+      rateChart.addSeries({name: 'Max', data: county_rate_series, color: CHART_COLORS[0]});
+      rateChart.addSeries({name: 'Avg', data: county_avg_series, color: CHART_COLORS[1]});
 
 
       for (i=chart.series.length-1; i>= 0; i--) {
@@ -551,7 +553,7 @@ function load(file) {
       }
       chart.addSeries({name: 'Total', type: 'line', data: total_series});
       for (k = 0; k < 6; k++) {
-        chart.addSeries({name: AGE_GROUPS[5 - k], data: age_series[5 - k]})
+        chart.addSeries({name: AGE_GROUPS[5 - k], data: age_series[5 - k], color: CHART_COLORS[k]})
       }
 
       chart.yAxis[0].setExtremes(0, max);
