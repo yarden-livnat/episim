@@ -11,16 +11,20 @@
 </head>
 <body>
 
-<h3>Episim</h3>
-
 <div>
     <table>
         <tbody>
         <tr><td>Data set</td><td><select id="dataset"></select> <span id="spinner" class="fa fa-spinner" aria-hidden="true" style="visibility: hidden"></span></td></tr>
         <tr><td>Levels:</td><td><input id="levels" type="number" min="3" max="8" value="7"></td></tr>
         <tr><td>Max rate:</td><td><input id="maxRate" type="number" min="1" max="0.5" value="3"></td></tr>
-        <tr><td><b>Day</b></td><td><span id="day-value"></span></td></tr>
-        <tr><td><b>Cases</b></td><td><span id="cases"></span></td></tr>
+        </tbody>
+    </table>
+
+    <h3>Episim</h3>
+    <table>
+        <tbody>
+            <tr><td><b>Day</b></td><td><span id="day-value"></span></td></tr>
+            <tr><td><b>Cases</b></td><td><span id="cases"></span></td></tr>
         </tbody>
     </table>
     <button id="play" class="fa fa-play" disabled style="font-size: small"></button> <button id="save" disabled>Save</button><br>

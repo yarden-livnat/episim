@@ -106,6 +106,8 @@ d3.select('#play')
           show_day(d);
         } else {
           clearInterval(interval);
+          play = !play;
+          d3.select('#play').classed({"fa-play": !play, "fa-pause": play});
         }
       }, PLAY_INTERNAL);
     } else {
@@ -557,12 +559,14 @@ function load(file) {
 
       update_distribution();
 
-      d3.select('#day').attr('max', last);
+      d3.select('#day').attr('max', last).property('value', 0);
       d3.select('#play').property('disabled', false);
       d3.select('#day').property('disabled', false);
-      d3.select('#spinner').style('visibility', 'hidden').classed('fa-spin', false);;
-      show_day(day);
-    });
+      d3.select('#spinner').style('visibility', 'hidden').classed('fa-spin', false);
+
+      d3.select('#day-value').text(day_format(0));
+      show_day(0);
+    })
 }
 
 function update_distribution() {
