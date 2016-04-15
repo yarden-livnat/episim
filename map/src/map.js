@@ -2,24 +2,37 @@
  * Created by yarden on 1/25/16.
  */
 
+//var AGE_GROUPS = [
+//  '     < 1 Infants',
+//  ' 1 -  5 Toddlers',
+//  ' 6 -12 Kids',
+//  '13-18 Teens',
+//  '19-64 Adults',
+//  '   +64  Elderly'];
+
 var AGE_GROUPS = [
-  '     < 1 Infants',
-  ' 1 -  5 Toddlers',
-  ' 6 -12 Kids',
-  '13-18 Teens',
-  '19-64 Adults',
-  '   +64  Elderly'];
+  '     < 1',
+  ' 1 -  5',
+  ' 6 -12',
+  '13-18',
+  '19-64',
+  '   +64'];
 
 var PREFIX = 'W';
+var PLAY_INTERNAL = 200;
 
 var countyPop = {};
 var data;
 var day = 0;
 var play = false;
 var age_visibility = [true, true, true, true, true, true];
+//var svgsaver = new SvgSaver();
 
-var CMAP_MAX_RATE = 0.02;
-var CMAP_LEVELS = 8;
+var day_format = d3.format('>3d');
+var cases_format = d3.format('>9,d');
+
+var CMAP_MAX_RATE = 0.03;
+var CMAP_LEVELS = 7;
 var CMAP_COLORS = colorbrewer.YlOrRd;
 var CMAP = CMAP_COLORS[CMAP_LEVELS];
 
@@ -74,10 +87,49 @@ d3.select("#maxRate")
     update_distribution();
   });
 
+d3.select('#day-value').text(day_format(0));
+
+var interval;
+
 d3.select('#play')
   .on('click', function() {
     play = !play;
     d3.select('#play').classed({"fa-play": !play, "fa-pause": play});
+    if (play) {
+      var max = +d3.select('#day').property('max');
+      console.log('max', max);
+      interval = setInterval(function() {
+        var d = +d3.select('#day').property('value') + 1;
+        if (d < max) {
+          d3.select('#day').property('value', d);
+          d3.select('#day-value').text(d);
+          show_day(d);
+        } else {
+          clearInterval(interval);
+        }
+      }, PLAY_INTERNAL);
+    } else {
+      clearInterval(interval);
+    }
+  });
+
+d3.select('#save')
+  .on('click', function() {
+    //var el = document.querySelector('#map')
+    //svgsaver.asPng(el);
+    //console.log('Save complete');
+
+    leafletImage(map, function(err, canvas) {
+      // now you have canvas
+      // example thing to do with that canvas:
+      var img = document.createElement('img');
+      var dimensions = map.getSize();
+      img.width = dimensions.x;
+      img.height = dimensions.y;
+      img.src = canvas.toDataURL();
+      document.getElementById('images').innerHTML = '';
+      document.getElementById('images').appendChild(img);
+    });
   });
 
 /*
@@ -221,7 +273,7 @@ var chart = new Highcharts.Chart({
     renderTo: document.querySelector('#cases-chart'),
     type: 'area',
     zoomType: 'x',
-    height: 150,
+    height: 200,
     width: 600
   },
   title: {text: null},
@@ -274,8 +326,8 @@ var rateChart = new Highcharts.Chart({
     renderTo: document.querySelector('#rate-chart'),
     type: 'line',
     zoomType: 'x',
-    height:150,
-    width: 300
+    height:200,
+    width: 400
   },
   title: {text: null},
   xAxis: {
@@ -306,57 +358,57 @@ var rateChart = new Highcharts.Chart({
   series: []
 });
 
-var histogramChart = new Highcharts.Chart({
-  chart: {
-    renderTo: document.querySelector('#histogram-chart'),
-    type: 'column',
-    zoomType: 'x',
-    height:150,
-    width: 300
-  },
-  title: {text: null},
-  xAxis: {
-    title: { text: 'Rate'}
-  },
-  yAxis: {
-    min: 0,
-    title: {text: '# of counties'}
-    //tickInterval: 1
-  },
-  //tooltip: {
-  //  crosshairs: true,
-  //  shared: true,
-  //  valueSuffix: '%',
-  //  formatter: function () {
-  //    var s = '<b>Day ' + this.x + '</b>';
-  //    this.points.forEach( function (p) {
-  //      s += '<br/>' + p.series.name + ': ' + Math.floor(10*p.y)/10 + '%';
-  //    });
-  //
-  //    return s;
-  //  }
-  //},
-
-  plotOptions: {
-    column: {
-      pointPadding: 0.2,
-      borderWidth: 0,
-      animation: false
-    }
-  },
-  legend: {
-    enabled: false
-  },
-  series: []
-});
+//var histogramChart = new Highcharts.Chart({
+//  chart: {
+//    renderTo: document.querySelector('#histogram-chart'),
+//    type: 'column',
+//    zoomType: 'x',
+//    height:150,
+//    width: 300
+//  },
+//  title: {text: null},
+//  xAxis: {
+//    title: { text: 'Rate'}
+//  },
+//  yAxis: {
+//    min: 0,
+//    title: {text: '# of counties'}
+//    //tickInterval: 1
+//  },
+//  //tooltip: {
+//  //  crosshairs: true,
+//  //  shared: true,
+//  //  valueSuffix: '%',
+//  //  formatter: function () {
+//  //    var s = '<b>Day ' + this.x + '</b>';
+//  //    this.points.forEach( function (p) {
+//  //      s += '<br/>' + p.series.name + ': ' + Math.floor(10*p.y)/10 + '%';
+//  //    });
+//  //
+//  //    return s;
+//  //  }
+//  //},
+//
+//  plotOptions: {
+//    column: {
+//      pointPadding: 0.2,
+//      borderWidth: 0,
+//      animation: false
+//    }
+//  },
+//  legend: {
+//    enabled: false
+//  },
+//  series: []
+//});
 
 var distributionChart = new Highcharts.Chart({
   chart: {
     renderTo: document.querySelector('#distribution-chart'),
     type: 'area',
     zoomType: 'x',
-    height: 150,
-    width: 600
+    height: 200,
+    width: 580
   },
   title: {text: null},
   xAxis: {
@@ -425,6 +477,9 @@ queue()
 
 
 function load(file) {
+  d3.select('#play').property('disabled', true);
+  d3.select('#day').property('disabled', true);
+  d3.select('#spinner').style('visibility', 'visible').classed('fa-spin', true);
   queue()
     .defer(d3.json, 'data/' + file + '/cases_per_day.json')
     .defer(d3.csv, 'data/' + file + '/county_pop.csv', function (d) {countyPop[+d.county] = +d.pop; })
@@ -503,6 +558,9 @@ function load(file) {
       update_distribution();
 
       d3.select('#day').attr('max', last);
+      d3.select('#play').property('disabled', false);
+      d3.select('#day').property('disabled', false);
+      d3.select('#spinner').style('visibility', 'hidden').classed('fa-spin', false);;
       show_day(day);
     });
 }
@@ -543,11 +601,10 @@ d3.select('#dataset').on('change', function() { load(this.value); });
 d3.select('#day')
   .on('input', function () {
     var d = +this.value;
-    d3.select('#day-value').text(d);
+    d3.select('#day-value').text(day_format(d));
     show_day(d);
   })
   .property('value', 0);
-
 
 function show_day(current) {
   day = current;
@@ -562,9 +619,9 @@ function show_day(current) {
   for (var i in counties) {
     n += counties[i].cases;
   }
-  d3.select('#cases').text(n);
+  d3.select('#cases').text(cases_format(n));
 
-  show_histogram();
+  //show_histogram();
 }
 
 function show_histogram() {
@@ -596,5 +653,13 @@ function show_histogram() {
 }
 
 function show_distribution() {
+}
+
+
+// screenshot save
+function save() {
 
 }
+
+
+

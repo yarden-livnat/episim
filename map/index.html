@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en-US-x-Hixie">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,12 +14,17 @@
 <h3>Episim</h3>
 
 <div>
-    <b>Dataset: </b> <select id="dataset"></select>
-    <b>Levels: </b>  <input id="levels" type="number" min="3" max="8" value="8">
-    <b>Max rate:</b> <input id="maxRate" type="number" min="1" value="2" step="0.5" maxlength="5"><br>
-    <b>Day:</b> <span id="day-value"></span> <button id="play" class="fa fa-play"></button><br>
+    <table>
+        <tbody>
+        <tr><td>Data set</td><td><select id="dataset"></select> <span id="spinner" class="fa fa-spinner" aria-hidden="true" style="visibility: hidden"></span></td></tr>
+        <tr><td>Levels:</td><td><input id="levels" type="number" min="3" max="8" value="7"></td></tr>
+        <tr><td>Max rate:</td><td><input id="maxRate" type="number" min="1" max="0.5" value="3"></td></tr>
+        <tr><td><b>Day</b></td><td><span id="day-value"></span></td></tr>
+        <tr><td><b>Cases</b></td><td><span id="cases"></span></td></tr>
+        </tbody>
+    </table>
+    <button id="play" class="fa fa-play" disabled style="font-size: small"></button> <button id="save" disabled>Save</button><br>
     <input type="range" id="day" value="0" min="0" max="0" step="1" style="width:500px">  <br>
-    <b>Cases:</b> <span id="cases"></span><br>
     <br>
 </div>
 
@@ -30,13 +35,25 @@
 <div id="histogram-chart" style="display:inline-block"></div>
 <div id="distribution-chart" style="display:inline-block"></div>
 
+<div id="images">
+
+</div>
 <script src="//d3js.org/queue.v1.min.js"></script>
 <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="//d3js.org/topojson.v1.min.js"></script>
 
+
 <script src="//code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="//code.highcharts.com/highcharts-more.js"></script>
 <script src="//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
+<!--<script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.1.13/es5-shim.js"></script>-->
+<!--<script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.1.13/es5-sham.js"></script>-->
+<!--<script src="//rawgit.com/eligrey/Blob.js/master/Blob.js"></script>-->
+<!--<script src="//rawgit.com/eligrey/canvas-toBlob.js/master/canvas-toBlob.js"></script>-->
+<!--<script src="//rawgit.com/eligrey/FileSaver.js/master/FileSaver.js"></script>-->
+<!--<script src="lib/svgsaver/browser.min.js"></script>-->
+<!--<script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-image/v0.0.4/leaflet-image.js'></script>-->
 
 <script src="src/colorbrewer.js"></script>
 <script src="src/map.js"></script>
